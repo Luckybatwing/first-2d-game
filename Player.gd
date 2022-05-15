@@ -5,6 +5,8 @@ signal hit
 export var speed = 400  # How fast the player will move (pixels/sec).
 var screen_size  # Size of the game window.
 
+var target = Vector2()  # The clicked pos
+
 
 func _ready():
 	screen_size = get_viewport_rect().size
@@ -13,14 +15,19 @@ func _ready():
 
 func _process(delta):
 	var velocity = Vector2.ZERO  # The player's movement vector.
-	if Input.is_action_pressed("move_right"):
-		velocity.x += 1
-	if Input.is_action_pressed("move_left"):
-		velocity.x -= 1
-	if Input.is_action_pressed("move_down"):
-		velocity.y += 1
-	if Input.is_action_pressed("move_up"):
-		velocity.y -= 1
+
+	# Move towards the target and stop when close.
+	if position.distance_to(target) > 10:
+		velocity = target - position
+
+	# if Input.is_action_pressed("move_right"):
+	# 	velocity.x += 1
+	# if Input.is_action_pressed("move_left"):
+	# 	velocity.x -= 1
+	# if Input.is_action_pressed("move_down"):
+	# 	velocity.y += 1
+	# if Input.is_action_pressed("move_up"):
+	# 	velocity.y -= 1
 
 	if velocity.length() > 0:
 		velocity = velocity.normalized() * speed
@@ -52,5 +59,11 @@ func _on_Player_body_entered(_body):
 
 func start(pos):
 	position = pos
+	target = pos
 	show()
 	$CollisionShape2D.disabled = false
+
+
+func _input(event):
+	if event is InputEventScreenTouch and event.pressed:
+		target = event.position
